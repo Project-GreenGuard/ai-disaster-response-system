@@ -10,7 +10,7 @@ DHT dht(DHTPIN, DHTTYPE);
 const char* ssid = "SSID";
 const char* password = "PASSWORD";
 // Server URL - Your dashboard IP
-const char* serverURL = "http://192.168.2.164:5000/api/temperature";
+const char* serverURL = "http://192.168.2.23:5000/api/temperature";
 // Sensor Information - CUSTOMIZE THIS FOR EACH SENSOR
 const char* sensorID = "sensor01";
 const char* sensorLocation = "Sheridan Forest Oakville";

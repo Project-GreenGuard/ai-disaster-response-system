@@ -14,95 +14,162 @@ DASHBOARD_HTML = """
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Temperature Dashboard</title>
+    <title>Disaster Dashboard</title>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
     <style>
         body {
             margin: 0;
             padding: 0;
-            background-color: black;
+            background-color: #000;
             color: white;
             font-family: Arial, sans-serif;
+            display: flex;
+            height: 100vh;
+        }
+
+        /* LEFT PANEL */
+        .info-panel {
+            width: 35%;
+            background-color: #111;
+            padding: 40px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            border-right: 2px solid #333;
         }
+
         .sensor-info {
-            font-size: 30px;
-            color: #888;
-            margin-bottom: 20px;
+            font-size: 28px;
+            color: #ccc;
+            margin-bottom: 15px;
         }
+
         .temperature {
-            font-size: 120px;
+            font-size: 95px;
             font-weight: bold;
             color: #00ff00;
         }
+
         .temperature.high {
             color: #ff0000;
         }
+
         .location {
-            font-size: 40px;
-            color: #888;
-            margin-top: 20px;
+            font-size: 35px;
+            color: #aaa;
+            margin-top: 15px;
         }
+
         .fire-warning {
             display: none;
             background-color: #ff0000;
             color: white;
-            padding: 30px 60px;
-            font-size: 50px;
+            padding: 20px 40px;
+            font-size: 40px;
             font-weight: bold;
             border-radius: 10px;
-            margin-top: 40px;
+            margin-top: 30px;
             animation: blink 1s infinite;
-            text-align: center;
         }
+
         .fire-warning.show {
             display: block;
         }
+
         @keyframes blink {
             0%, 50%, 100% { opacity: 1; }
-            25%, 75% { opacity: 0.5; }
+            25%, 75% { opacity: 0.3; }
         }
+
+        /* MAP PANEL */
+        #map {
+            width: 65%;
+            height: 100%;
+        }
+
     </style>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+
+<body>
+
+    <!-- LEFT INFO PANEL -->
+    <div class="info-panel">
+        <div class="sensor-info" id="sensor">Sensor: --</div>
+        <div class="temperature" id="temp">--°C</div>
+        <div class="location" id="location">Location: --</div>
+        <div class="fire-warning" id="fire-warning">🔥 FIRE WARNING – HIGH TEMP 🔥</div>
+    </div>
+
+    <!-- RIGHT MAP -->
+    <div id="map"></div>
+
     <script>
+        // Initialize map centered on GTA (Toronto)
+        var map = L.map('map').setView([43.6532, -79.3832], 10);
+
+        // Load map tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 18,
+        }).addTo(map);
+
+        // Example 10 locations (GTA)
+        var sampleLocations = [
+            { name: "Toronto", coords: [43.6532, -79.3832] },
+            { name: "Mississauga", coords: [43.5890, -79.6441] },
+            { name: "Brampton", coords: [43.7315, -79.7624] },
+            { name: "Markham", coords: [43.8561, -79.3370] },
+            { name: "Vaughan", coords: [43.8372, -79.5083] },
+            { name: "Richmond Hill", coords: [43.8828, -79.4403] },
+            { name: "Oakville", coords: [43.4675, -79.6877] },
+            { name: "Scarborough", coords: [43.7764, -79.2318] },
+            { name: "Etobicoke", coords: [43.6205, -79.5132] },
+            { name: "Pickering", coords: [43.8373, -79.0892] }
+        ];
+
+        // Add markers to the map
+        sampleLocations.forEach(loc => {
+            L.marker(loc.coords).addTo(map)
+                .bindPopup("<b>" + loc.name + "</b>");
+        });
+
+        // Fetch sensor data every 2 seconds
         function updateTemp() {
             fetch('/api/temperature')
                 .then(response => response.json())
                 .then(data => {
-                    if (data.temperature !== null) {
-                        document.getElementById('temp').textContent = data.temperature + '°C';
-                        
-                        // Check for fire warning
-                        const tempElement = document.getElementById('temp');
-                        const warningElement = document.getElementById('fire-warning');
-                        
-                        if (data.temperature > 35) {
-                            tempElement.classList.add('high');
-                            warningElement.classList.add('show');
-                        } else {
-                            tempElement.classList.remove('high');
-                            warningElement.classList.remove('show');
-                        }
-                    }
-                    if (data.sensor_id !== null) {
-                        document.getElementById('sensor').textContent = 'Sensor: ' + data.sensor_id;
-                    }
-                    if (data.location !== null) {
-                        document.getElementById('location').textContent = 'Location: ' + data.location;
+                    document.getElementById('temp').textContent =
+                        data.temperature !== null ? data.temperature + '°C' : '--°C';
+
+                    document.getElementById('sensor').textContent =
+                        data.sensor_id !== null ? "Sensor: " + data.sensor_id : "Sensor: --";
+
+                    document.getElementById('location').textContent =
+                        data.location !== null ? "Location: " + data.location : "Location: --";
+
+                    // Fire warning logic
+                    const tempEl = document.getElementById('temp');
+                    const fireEl = document.getElementById('fire-warning');
+
+                    if (data.temperature > 35) {
+                        tempEl.classList.add('high');
+                        fireEl.classList.add('show');
+                    } else {
+                        tempEl.classList.remove('high');
+                        fireEl.classList.remove('show');
                     }
                 });
         }
+
         setInterval(updateTemp, 2000);
         updateTemp();
     </script>
-</head>
-<body>
-    <div class="sensor-info" id="sensor">Sensor: --</div>
-    <div class="temperature" id="temp">--°C</div>
-    <div class="location" id="location">Location: --</div>
-    <div class="fire-warning" id="fire-warning">⚠️ FIRE WARNING ⚠️<br>High Temperature Detected!</div>
 </body>
 </html>
 """
@@ -127,5 +194,5 @@ def get_temperature():
     return jsonify(latest_data)
 
 if __name__ == '__main__':
-    print("Dashboard running at http://192.168.2.164:5000")
-    app.run(host='192.168.2.164', port=5000)
+    print("Dashboard running at http://192.168.2.23:5000")
+    app.run(host='192.168.2.23', port=5000, debug=True)
