@@ -28,6 +28,8 @@ DASHBOARD_HTML = """
             font-family: Arial, sans-serif;
             display: flex;
             height: 100vh;
+            margin-top: 70px;
+            margin-bottom: 40px;  /* for footer space */
         }
 
         /* LEFT PANEL */
@@ -41,7 +43,6 @@ DASHBOARD_HTML = """
             align-items: center;
             border-right: 2px solid #333;
             display: flex;
-            margin-top: 70px;
         }
 
         .sensor-info {
@@ -92,6 +93,7 @@ DASHBOARD_HTML = """
             width: 65%;
             height: 100%;
         }
+
         /* TOP BAR */
         .top-bar {
             position: fixed;
@@ -120,8 +122,22 @@ DASHBOARD_HTML = """
             color: #00ff00;
         }
 
-
-
+        /* FOOTER */
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 40px;
+            background-color: #0d0d0d;
+            color: #888;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            border-top: 2px solid #222;
+            z-index: 1000;
+        }
     </style>
 
     <!-- Leaflet JS -->
@@ -145,6 +161,11 @@ DASHBOARD_HTML = """
 
     <!-- RIGHT MAP -->
     <div id="map"></div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+        © 2025 GreenGuard | AI-Driven Disaster Response System | SSU 
+    </div>
 
     <script>
         // Initialize map centered on GTA (Toronto)
@@ -202,7 +223,6 @@ DASHBOARD_HTML = """
                     }
                 });
         }
-
         setInterval(updateTemp, 2000);
         updateTemp();
     </script>
